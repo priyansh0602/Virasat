@@ -1,0 +1,273 @@
+@import url('https://fonts.cdnfonts.com/css/samarkan');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --parchment: #f5ead0;
+    --ink: #2c1a0e;
+    --amber-glow: rgba(200, 131, 42, 0.15);
+    --regal-gold: #d4a853;
+    --deep-maroon: #5c1a1a;
+    --imperial-dark: #1a120b;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: #1a120b;
+    color: #f5ead0;
+    font-family: 'Lato', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 { font-family: 'Cinzel', 'Playfair Display', Georgia, serif; }
+
+  ::selection {
+    background-color: #d4a853;
+    color: #1a120b;
+  }
+
+  /* Scrollbar — dark imperial */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #1a120b; }
+  ::-webkit-scrollbar-thumb { background: #d4a853; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #b8860b; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-regal-gold to-regal-amber text-heritage-950 font-cinzel font-semibold
+           px-6 py-3 rounded-sm transition-all duration-300 tracking-widest uppercase text-sm
+           shadow-gold hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+           hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply border border-regal-gold/40 text-regal-gold hover:bg-regal-gold/10 font-cinzel font-semibold
+           px-6 py-3 rounded-sm transition-all duration-300 tracking-widest uppercase text-sm;
+  }
+
+  .input-field {
+    @apply w-full bg-heritage-950/60 border border-regal-gold/30 rounded-sm px-4 py-3
+           text-parchment font-body placeholder-heritage-500
+           focus:outline-none focus:ring-2 focus:ring-regal-gold/50 focus:border-regal-gold
+           transition-all duration-300 backdrop-blur-sm;
+  }
+
+  .card-heritage {
+    @apply bg-heritage-950/70 backdrop-blur-md border border-regal-gold/20 rounded-sm
+           shadow-heritage hover:shadow-gold transition-all duration-500
+           hover:border-regal-gold/50;
+  }
+
+  .ornament-divider::before,
+  .ornament-divider::after {
+    content: '';
+    @apply flex-1 border-t border-regal-gold/30;
+  }
+  .ornament-divider {
+    @apply flex items-center gap-3 text-regal-gold/60 text-sm my-6;
+  }
+
+  /* Cinematic section title decoration */
+  .section-title {
+    @apply font-cinzel text-2xl md:text-3xl text-parchment tracking-wider uppercase;
+  }
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    margin-top: 12px;
+    background: linear-gradient(90deg, #d4a853, transparent);
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  /* Backgrounds & Textures */
+  .bg-parchment-texture {
+    background-color: #1a120b;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, #1a120b 0%, #2c1a0e 50%, #1a120b 100%);
+  }
+
+  /* 3D Transform Utilities for Card Flips */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  /* Film grain overlay */
+  .film-grain::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+    animation: grain 8s steps(10) infinite;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+  }
+
+  /* Vignette overlay for cinematic feel */
+  .vignette::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Gold text gradient */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #d4a853, #f2d9ac, #b8860b, #d4a853);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s ease-in-out infinite;
+  }
+
+  /* Subtle glow for focused elements */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 168, 83, 0.15),
+                0 0 60px rgba(212, 168, 83, 0.05);
+  }
+}
+
+/* OTP input styling — dark theme */
+.otp-input {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 1.5px solid rgba(212, 168, 83, 0.4);
+  border-radius: 2px;
+  background: rgba(26, 18, 11, 0.8);
+  color: #f5ead0;
+  outline: none;
+  transition: all 0.3s;
+}
+.otp-input:focus {
+  border-color: #d4a853;
+  box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.2), 0 0 20px rgba(212, 168, 83, 0.1);
+}
+
+/* Badge unlocked animation */
+@keyframes badgePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-badge-pop {
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Slide up animation for cards */
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered card entrance */
+.card-heritage:nth-child(1) { animation-delay: 0ms; }
+.card-heritage:nth-child(2) { animation-delay: 80ms; }
+.card-heritage:nth-child(3) { animation-delay: 160ms; }
+.card-heritage:nth-child(4) { animation-delay: 240ms; }
+.card-heritage:nth-child(5) { animation-delay: 320ms; }
+.card-heritage:nth-child(6) { animation-delay: 400ms; }
+.card-heritage:nth-child(7) { animation-delay: 480ms; }
+.card-heritage:nth-child(8) { animation-delay: 560ms; }
+
+/* Custom scrollbar for chat */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #d4a853; border-radius: 2px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+/* Heritage marker glow */
+.heritage-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Leaflet theming — dark */
+.leaflet-container {
+  font-family: 'Lato', sans-serif;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 2px;
+  background: #2c1a0e;
+  color: #f5ead0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+.leaflet-popup-tip {
+  background: #2c1a0e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Horizontal gold ornament */
+.gold-ornament {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+.gold-ornament::before,
+.gold-ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4a853, transparent);
+}
+
+/* Floating particle effect container */
+.particles-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(212, 168, 83, 0.4);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
