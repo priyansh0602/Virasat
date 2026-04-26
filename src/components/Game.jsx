@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Loader2, Sparkles, Award, Heart, Timer, Flame, RefreshCw, Box } from 'lucide-react'
 import { generateHeritageGameRound } from '../services/GroqService'
@@ -33,8 +33,97 @@ const FALLBACK_ROUNDS = [
     correct: 2,
     topic: "Gateway of India",
     fact: "It was built to commemorate the landing of King George V and Queen Mary at Apollo Bunder in 1911."
-  }
+  },
+  {
+    riddle: "Born in 1336, I was the last bastion of Hindu power in the South. My stone chariot stands as testimony to a golden age that ended on a bloody battlefield.",
+    options: ["Vijayanagara Empire", "Chola Dynasty", "Pandya Kingdom", "Hoysala Empire"],
+    correct: 0,
+    topic: "Vijayanagara Empire",
+    fact: "At its peak under Krishnadevaraya, Hampi had a population of 500,000 — larger than Rome at the time."
+  },
+  {
+    riddle: "I am the pool of nectar, a shimmering golden sanctuary surrounded by sacred water. All who enter must walk across a causeway of devotion.",
+    options: ["Lotus Temple", "Golden Temple", "Meenakshi Temple", "Somnath Temple"],
+    correct: 1,
+    topic: "Golden Temple",
+    fact: "The Golden Temple serves free meals (langar) to over 100,000 people every single day, regardless of religion or caste."
+  },
+  {
+    riddle: "My Sun never sets. Carved as a colossal chariot with 24 stone wheels, I was built to honor the charioteer of the heavens on Odisha's coast.",
+    options: ["Jagannath Temple", "Konark Sun Temple", "Lingaraja Temple", "Mukteshwar Temple"],
+    correct: 1,
+    topic: "Konark Sun Temple",
+    fact: "Each of Konark's 24 intricately carved wheels functions as a sundial, accurately telling the time of day."
+  },
+  {
+    riddle: "A warrior queen on horseback, I refused to surrender my kingdom to the British. My battle cry echoed across the plains of Central India in 1857.",
+    options: ["Ahilyabai Holkar", "Rani Lakshmibai", "Razia Sultan", "Chand Bibi"],
+    correct: 1,
+    topic: "Rani Lakshmibai",
+    fact: "Rani Lakshmibai rode into battle with her adopted son tied to her back, fighting against the British in the 1857 rebellion."
+  },
+  {
+    riddle: "Thirty painted caves tell the stories of the Buddha's past lives over a thousand years. I was lost to the jungle before a British officer found me chasing a tiger.",
+    options: ["Ellora Caves", "Ajanta Caves", "Elephanta Caves", "Badami Caves"],
+    correct: 1,
+    topic: "Ajanta Caves",
+    fact: "The Ajanta Caves were lost to the world for nearly 1,000 years before being accidentally rediscovered by a British officer in 1819."
+  },
+  {
+    riddle: "I am the diamond of the Deccan, a pearl among cities. My four arches face the four cardinal directions, crowned by four minarets of light.",
+    options: ["Golconda Fort", "Charminar", "Mecca Masjid", "Falaknuma Palace"],
+    correct: 1,
+    topic: "Charminar",
+    fact: "Muhammad Quli Qutb Shah built the Charminar in 1591 to mark the end of a devastating plague, as a symbol of gratitude."
+  },
+  {
+    riddle: "Carved from a single rock, I stand 57 feet tall, unclothed and serene, visible from miles around in Karnataka. Monks have revered me for over a millennium.",
+    options: ["Statue of Unity", "Gommateshwara", "Nandi Bull", "Brihadeeswarar"],
+    correct: 1,
+    topic: "Gommateshwara",
+    fact: "The Gommateshwara statue is bathed in milk, saffron, and sandalwood paste during the Mahamastakabhisheka ceremony held once every 12 years."
+  },
+  {
+    riddle: "I am where the Buddha first turned the Wheel of Dharma, in a deer park near the holiest city on the Ganges. An Ashokan pillar still marks the spot.",
+    options: ["Bodh Gaya", "Sarnath", "Kushinagar", "Lumbini"],
+    correct: 1,
+    topic: "Sarnath",
+    fact: "The Lion Capital of Ashoka found at Sarnath was adopted as the national emblem of India after independence."
+  },
 ];
+
+function normalizeRound(candidate) {
+  if (!candidate || typeof candidate !== 'object') return null
+
+  const riddle = typeof candidate.riddle === 'string' ? candidate.riddle.trim() : ''
+  const options = Array.isArray(candidate.options)
+    ? candidate.options
+        .filter(opt => typeof opt === 'string')
+        .map(opt => opt.trim())
+        .filter(Boolean)
+        .slice(0, 4)
+    : []
+
+  const parsedCorrect = Number.isInteger(candidate.correct)
+    ? candidate.correct
+    : Number.parseInt(candidate.correct, 10)
+
+  if (!riddle || options.length < 2) return null
+
+  const correct = Number.isInteger(parsedCorrect) && parsedCorrect >= 0 && parsedCorrect < options.length
+    ? parsedCorrect
+    : 0
+
+  const topic = typeof candidate.topic === 'string' && candidate.topic.trim()
+    ? candidate.topic.trim()
+    : options[correct]
+
+  const fact = typeof candidate.fact === 'string' && candidate.fact.trim()
+    ? candidate.fact.trim()
+    : `A key clue points to ${options[correct]}.`
+
+  return { riddle, options, correct, topic, fact }
+}
 
 export default function Game({ onBack, user, profile }) {
   const [mode, setMode] = useState('selection') // selection | detective | memory
@@ -52,6 +141,19 @@ export default function Game({ onBack, user, profile }) {
   const [milestone, setMilestone] = useState(null)
   const [gameOver, setGameOver] = useState(false)
   const [highScore, setHighScore] = useState(0)
+
+  const showFactTimeoutRef = useRef(null)
+  const gameOverTimeoutRef = useRef(null)
+
+  // Memoize profile for HeritageMemoryGame to prevent infinite re-renders
+  const memoryProfile = useMemo(() => ({ ...profile, id: user?.id }), [profile, user?.id])
+
+  useEffect(() => {
+    return () => {
+      if (showFactTimeoutRef.current) clearTimeout(showFactTimeoutRef.current)
+      if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current)
+    }
+  }, [])
 
   // Load high score on mount
   useEffect(() => {
@@ -74,31 +176,34 @@ export default function Game({ onBack, user, profile }) {
   }, [gameOver, score, highScore, user?.id]);
 
   const loadNextRound = async (customHistory = history) => {
+    if (showFactTimeoutRef.current) clearTimeout(showFactTimeoutRef.current)
+    if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current)
+
     setLoading(true)
     setSelected(null)
     setShowFact(false)
     setMilestone(null)
     setTimeLeft(20)
     setRound(null) // Clear previous round to avoid stale display
-    
-    let nextRound = null;
-    
+
+    let nextRound = null
+
     try {
       // Attempt 1: AI Generation
-      nextRound = await generateHeritageGameRound(customHistory)
-      
+      nextRound = normalizeRound(await generateHeritageGameRound(customHistory))
+
       if (!nextRound) {
         // Attempt 2: AI Retry
-        console.log('AI Failed, retrying...');
-        nextRound = await generateHeritageGameRound(customHistory)
+        console.log('AI Failed, retrying...')
+        nextRound = normalizeRound(await generateHeritageGameRound(customHistory))
       }
-      
+
       if (!nextRound) {
-        // Final Fallback: Hardcoded
-        console.log('AI failed twice, using fallback.');
-        const untapped = FALLBACK_ROUNDS.filter(r => !customHistory.includes(r.topic));
-        const pool = untapped.length > 0 ? untapped : FALLBACK_ROUNDS;
-        nextRound = pool[Math.floor(Math.random() * pool.length)];
+        // Final Fallback: Hardcoded (12 rounds — enough for a full session)
+        console.log('AI unavailable, using fallback.')
+        const untapped = FALLBACK_ROUNDS.filter(r => !customHistory.includes(r.topic))
+        const pool = untapped.length > 0 ? untapped : FALLBACK_ROUNDS
+        nextRound = normalizeRound(pool[Math.floor(Math.random() * pool.length)])
       }
 
       if (nextRound) {
@@ -108,14 +213,16 @@ export default function Game({ onBack, user, profile }) {
     } catch (err) {
       console.error('Game Load Err:', err)
       // Immediate fallback on error
-      const fallback = FALLBACK_ROUNDS[Math.floor(Math.random() * FALLBACK_ROUNDS.length)];
-      setRound(fallback);
+      const fallback = normalizeRound(FALLBACK_ROUNDS[Math.floor(Math.random() * FALLBACK_ROUNDS.length)])
+      if (fallback) setRound(fallback)
     }
-    
+
     setLoading(false)
   }
 
   const restartGame = () => {
+    if (showFactTimeoutRef.current) clearTimeout(showFactTimeoutRef.current)
+    if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current)
     setLives(3)
     setScore(0)
     setStreak(0)
@@ -146,35 +253,48 @@ export default function Game({ onBack, user, profile }) {
   }, [mode, round, loading, selected, gameOver])
 
   const handleSelect = (idx) => {
-    if (selected !== null || gameOver) return // prevent double clicking
+    if (selected !== null || gameOver || !round) return // prevent double clicking
+    if (!Array.isArray(round.options) || typeof round.correct !== 'number') return
+
+    if (showFactTimeoutRef.current) clearTimeout(showFactTimeoutRef.current)
+    if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current)
+
     setSelected(idx)
 
-    if (idx === round.correct) {
-      const timeBonus = Math.floor((timeLeft / 20) * 15) // max 15 bonus
-      setScore(s => s + 10 * (streak + 1) + timeBonus)
-      
-      const newStreak = streak + 1
-      setStreak(newStreak)
-      
-      if (newStreak === 3) setMilestone('🔥 HAT-TRICK! 🔥')
-      else if (newStreak === 5) setMilestone('🏆 MASTER HISTORIAN! 🏆')
-      else if (newStreak === 10) setMilestone('👑 EMPEROR OF KNOWLEDGE! 👑')
-      else setMilestone(null)
+    const answeredCorrectly = idx === round.correct
+    const finalLifeWouldBeLost = !answeredCorrectly && lives <= 1
 
+    if (answeredCorrectly) {
+      const timeBonus = Math.floor((timeLeft / 20) * 15) // max 15 bonus
+      // Use functional updaters to avoid stale closures from timer effect
+      setStreak(prev => {
+        const newStreak = prev + 1
+        setScore(s => s + 10 * newStreak + timeBonus)
+        if (newStreak === 3) setMilestone('🔥 HAT-TRICK! 🔥')
+        else if (newStreak === 5) setMilestone('🏆 MASTER HISTORIAN! 🏆')
+        else if (newStreak === 10) setMilestone('👑 EMPEROR OF KNOWLEDGE! 👑')
+        else setMilestone(null)
+        return newStreak
+      })
     } else {
       setStreak(0)
       setMilestone(null)
-      const newLives = lives - 1
-      setLives(newLives)
-      if (newLives <= 0) {
-        setTimeout(() => setGameOver(true), 2500)
+      // Functional updater ensures we always read the latest lives value,
+      // even when called from a stale timer closure
+      setLives(prev => Math.max(0, prev - 1))
+
+      if (finalLifeWouldBeLost) {
+        setShowFact(false)
+        gameOverTimeoutRef.current = setTimeout(() => setGameOver(true), 900)
       }
     }
-    
-    // Show fact after a brief delay
-    setTimeout(() => {
-      setShowFact(true)
-    }, 600)
+
+    // Show fact after a brief delay when game is still active
+    if (!finalLifeWouldBeLost) {
+      showFactTimeoutRef.current = setTimeout(() => {
+        setShowFact(true)
+      }, 600)
+    }
   }
 
   if (mode === 'memory') {
@@ -185,10 +305,12 @@ export default function Game({ onBack, user, profile }) {
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Selection
           </button>
         </div>
-        <HeritageMemoryGame current_city={profile?.city || 'Jaipur'} userProfile={{ ...profile, id: user?.id }} />
+        <HeritageMemoryGame current_city={profile?.city || 'Jaipur'} userProfile={memoryProfile} />
       </div>
     )
   }
+
+  const hasValidRound = round && Array.isArray(round.options) && round.options.length > 0 && Number.isInteger(round.correct)
 
   return (
     <div className="min-h-screen bg-heritage-950 text-parchment font-body relative overflow-hidden flex flex-col">
@@ -317,7 +439,7 @@ export default function Game({ onBack, user, profile }) {
                     <Loader2 size={32} className="animate-spin text-regal-gold" />
                     <p className="font-cinzel uppercase tracking-widest text-sm">Consulting the Oracles...</p>
                   </motion.div>
-                ) : round ? (
+                ) : hasValidRound ? (
                   <motion.div key="game" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} className="w-full flex flex-col items-center">
                     <div className="mb-10 text-center relative w-full pt-4">
                       <div className="flex justify-center mb-4">
@@ -373,7 +495,7 @@ export default function Game({ onBack, user, profile }) {
                           className="mt-12 w-full bg-heritage-900/80 border border-regal-gold/20 p-6 rounded-sm text-center shadow-2xl relative overflow-hidden"
                         >
                           <h3 className="font-cinzel text-regal-gold text-lg mb-2 flex items-center justify-center gap-2">
-                             {selected === round.correct ? <><Award size={18}/> Brilliant Discovery!</> : `The Answer was ${round.options[round.correct]}`}
+                             {selected === round.correct ? <><Award size={18}/> Brilliant Discovery!</> : `The Answer was ${round.options[round.correct] || 'Unknown'}`}
                           </h3>
                           <p className="text-heritage-300 leading-relaxed mb-6">{round.fact}</p>
                           <motion.button

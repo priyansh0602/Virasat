@@ -19,9 +19,24 @@ function drainGroqQueue() {
   if (groqBusy || groqQueue.length === 0) return
   groqBusy = true
   const { payload, resolve, reject } = groqQueue.shift()
-  fetch(URL, payload)
-    .then(resolve)
-    .catch(reject)
+
+  // 8-second safety timeout — prevents the entire queue from stalling
+  // if Groq hangs on a single request (common after 3-4 rapid game rounds)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+  fetch(URL, { ...payload, signal: controller.signal })
+    .then(res => { clearTimeout(timeoutId); resolve(res) })
+    .catch(err => {
+      clearTimeout(timeoutId)
+      if (err.name === 'AbortError') {
+        console.warn('Groq request timed out after 8s — resolving gracefully')
+        // Return a structured error response so callers hit their existing `data.error` handling
+        resolve(new Response(JSON.stringify({ error: { message: 'Request timed out' } }), { status: 408 }))
+      } else {
+        reject(err)
+      }
+    })
     .finally(() => {
       setTimeout(() => { groqBusy = false; drainGroqQueue() }, 700)
     })

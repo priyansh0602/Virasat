@@ -18,8 +18,6 @@ export default function HeritageMemoryGame({ current_city, userProfile }) {
   const [timeLeft, setTimeLeft] = useState(30)
   const [gameState, setGameState] = useState('playing') // playing, won, lost
   const [xpClaimed, setXpClaimed] = useState(false)
-  const [leaderboard, setLeaderboard] = useState([])
-  const [userRank, setUserRank] = useState(null)
   const [level, setLevel] = useState(1)
   const [levelBonus, setLevelBonus] = useState(0)
 
@@ -144,7 +142,7 @@ export default function HeritageMemoryGame({ current_city, userProfile }) {
     }
   }
 
-  // 4. Supabase Integration (XP & Leaderboard)
+  // 4. Supabase Integration (XP)
   const claimXP = async () => {
     if (xpClaimed || !userProfile?.id) return
     try {
@@ -160,35 +158,11 @@ export default function HeritageMemoryGame({ current_city, userProfile }) {
       if (!error) {
         setXpClaimed(true)
         setLevelBonus(bonus)
-        fetchLeaderboard()
       }
     } catch (err) {
       console.error('XP Claim Error:', err)
     }
   }
-
-  const fetchLeaderboard = useCallback(async () => {
-    if (!userProfile?.state) return
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username, xp, city')
-        .eq('state', userProfile.state)
-        .order('xp', { ascending: false })
-
-      if (data && !error) {
-        setLeaderboard(data.slice(0, 5))
-        const rank = data.findIndex(u => u.username === userProfile.username)
-        setUserRank(rank !== -1 ? rank + 1 : null)
-      }
-    } catch (err) {
-      console.error('Leaderboard Fetch Error:', err)
-    }
-  }, [userProfile])
-
-  useEffect(() => {
-    if (userProfile?.state) fetchLeaderboard()
-  }, [userProfile, fetchLeaderboard])
 
   if (loading) {
     return (
@@ -319,38 +293,6 @@ export default function HeritageMemoryGame({ current_city, userProfile }) {
         )}
       </AnimatePresence>
 
-      {/* Leaderboard Section */}
-      <div className="mt-4 bg-heritage-900/30 rounded-xl border border-regal-gold/10 p-6 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-regal-gold/10 pb-4">
-          <div className="flex items-center gap-4">
-             <Award className="text-regal-gold w-6 h-6" />
-             <h3 className="font-cinzel text-regal-gold tracking-widest text-lg uppercase">State Rankings</h3>
-          </div>
-          {userRank && (
-            <span className="text-xs font-cinzel text-parchment/60 bg-regal-gold/10 px-3 py-1 rounded-full border border-regal-gold/20">
-              You are <span className="text-regal-gold font-bold">#{userRank}</span> in {current_city}!
-            </span>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {leaderboard.map((player, i) => (
-            <div key={i} className="flex flex-col items-center text-center gap-1 p-3 rounded-lg bg-heritage-950/50 border border-regal-gold/5">
-               <span className="text-[10px] font-cinzel text-regal-gold uppercase tracking-tighter">Rank #{i+1}</span>
-               <span className="font-cinzel text-parchment text-sm truncate w-full">{player.username}</span>
-               <div className="flex items-center gap-1 text-xs text-regal-gold font-bold">
-                 <Trophy size={10} />
-                 {player.xp} XP
-               </div>
-            </div>
-          ))}
-          {leaderboard.length === 0 && (
-            <div className="col-span-5 py-4 text-center text-heritage-600 font-cinzel text-sm italic">
-               The chronicles are empty. Be the first to claim glory!
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }
