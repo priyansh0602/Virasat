@@ -244,11 +244,13 @@ export default function Auth({ onAuthSuccess }) {
 
   const clear = () => { setError(''); setInfo('') }
 
+  const appRedirectUrl = import.meta.env.VITE_APP_URL || window.location.origin
+
   const handleGoogle = async () => {
     setLoad(true); clear()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: appRedirectUrl },
     })
     if (err) { setError(err.message); setLoad(false) }
   }
