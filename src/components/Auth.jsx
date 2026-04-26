@@ -244,7 +244,15 @@ export default function Auth({ onAuthSuccess }) {
 
   const clear = () => { setError(''); setInfo('') }
 
-  const appRedirectUrl = import.meta.env.VITE_APP_URL || window.location.origin
+  const toAbsoluteUrl = (value) => {
+    const raw = (value ?? '').trim()
+    if (!raw) return window.location.origin
+    if (/^https?:\/\//i.test(raw)) return raw
+    if (raw.startsWith('//')) return `${window.location.protocol}${raw}`
+    return `https://${raw}`
+  }
+
+  const appRedirectUrl = toAbsoluteUrl(import.meta.env.VITE_APP_URL || window.location.origin)
 
   const handleGoogle = async () => {
     setLoad(true); clear()
