@@ -107,26 +107,12 @@ function narrateText(text, langCode, onEnd) {
 
 /* Scroll Progress Bar (top of page) */
 function ScrollProgress() {
-  const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
-  return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-regal-gold via-regal-amber to-regal-gold z-[60] origin-left"
-      style={{ scaleX }}
-    />
-  )
+  return null
 }
 
 /* Parallax Section Wrapper */
 function ParallaxSection({ children, className = '', speed = 0.3 }) {
-  const ref = useRef(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const y = useTransform(scrollYProgress, [0, 1], [60 * speed, -60 * speed])
-  return (
-    <motion.section ref={ref} className={className} style={{ y }}>
-      {children}
-    </motion.section>
-  )
+  return <section className={className}>{children}</section>
 }
 
 /* Chapter Divider — ornamental separator between sections */
@@ -240,19 +226,12 @@ function TypewriterText({ text, speed = 18 }) {
 
 /* Floating Decorative Mandala */
 function FloatingMandala({ side = 'left', top = '20%' }) {
-  const ref = useRef(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 360])
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 0.06, 0.06, 0])
   return (
-    <motion.div
-      ref={ref}
-      className="absolute pointer-events-none"
+    <div
+      className="absolute pointer-events-none opacity-[0.06]"
       style={{
         [side]: '-80px',
         top,
-        rotate,
-        opacity,
       }}
     >
       <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
@@ -269,65 +248,28 @@ function FloatingMandala({ side = 'left', top = '20%' }) {
             transform={`rotate(${angle} 100 100)`} />
         ))}
       </svg>
-    </motion.div>
+    </div>
   )
 }
 
 /* Floating Ancient Animations Overlay */
 function AncientAnimations() {
-  const { scrollYProgress } = useScroll()
-  const yParallax1 = useTransform(scrollYProgress, [0, 1], [0, -300])
-  const yParallax2 = useTransform(scrollYProgress, [0, 1], [0, -150])
-
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-[0.15]">
-      {/* Moving lines mimicking ancient strings/threads */}
-      <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-        <motion.path
-          d="M -100 200 Q 300 100 800 300 T 2000 200"
-          stroke="#d4a853" strokeWidth="0.5" fill="none"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.5 }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-        />
-        <motion.path
-          d="M 2000 800 Q 1000 700 500 900 T -100 800"
-          stroke="#d4a853" strokeWidth="0.3" fill="none" strokeDasharray="5 5"
-          initial={{ pathLength: 1, opacity: 0 }}
-          animate={{ pathLength: 0, opacity: 0.5 }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        />
-      </svg>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(212,168,83,0.12),transparent_25%),radial-gradient(circle_at_80%_20%,rgba(212,168,83,0.08),transparent_20%)]" />
 
       {/* Floating Diya (Lamp) */}
-      <motion.div
-        className="absolute bottom-20 left-[10%]"
-        style={{ y: yParallax1 }}
-        animate={{ y: [0, -20, 0], x: [0, 10, 0], rotate: [-2, 2, -2] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-      >
+      <div className="absolute bottom-20 left-[10%]">
         <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-          {/* Flame */}
-          <motion.path
-            d="M50 20 C60 40 60 50 50 60 C40 50 40 40 50 20 Z"
-            fill="#d4a853"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
+          <path d="M50 20 C60 40 60 50 50 60 C40 50 40 40 50 20 Z" fill="#d4a853" opacity="0.7" />
           {/* Base */}
           <path d="M20 60 Q50 90 80 60 Z" fill="#b8860b" />
           <path d="M30 60 L70 60" stroke="#d4a853" strokeWidth="2" />
         </svg>
-      </motion.div>
+      </div>
 
       {/* Abstract Sitar/Veena Silhouette */}
-      <motion.div
-        className="absolute top-1/4 right-[5%]"
-        style={{ y: yParallax2 }}
-        initial={{ rotate: 15, x: 100, opacity: 0 }}
-        animate={{ x: -50, opacity: 0.8 }}
-        transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-      >
+      <div className="absolute top-1/4 right-[5%] opacity-70">
         <svg width="120" height="200" viewBox="0 0 100 200" fill="none">
           <circle cx="50" cy="150" r="40" stroke="#d4a853" strokeWidth="2" />
           <path d="M50 110 L50 20" stroke="#d4a853" strokeWidth="8" strokeLinecap="round" />
@@ -336,31 +278,20 @@ function AncientAnimations() {
           {/* Decorative motif */}
           <circle cx="50" cy="150" r="30" stroke="#d4a853" strokeWidth="0.5" strokeDasharray="3 3" />
         </svg>
-      </motion.div>
+      </div>
 
       {/* Floating Lotus Element */}
-      <motion.div
-        className="absolute top-[60%] left-[20%]"
-        style={{ y: yParallax1 }}
-        animate={{ rotate: 360, opacity: [0.2, 0.5, 0.2] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-      >
+      <div className="absolute top-[60%] left-[20%] opacity-40">
         <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
           {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
             <path key={angle} d="M50 50 Q70 20 50 10 Q30 20 50 50 Z" stroke="#d4a853" strokeWidth="1" transform={`rotate(${angle} 50 50)`} />
           ))}
           <circle cx="50" cy="50" r="10" stroke="#d4a853" strokeWidth="2" />
         </svg>
-      </motion.div>
+      </div>
 
       {/* Ancient Temple Pillar / Column Silhouette */}
-      <motion.div
-        className="absolute top-0 right-[20%]"
-        style={{ y: yParallax2 }}
-        initial={{ y: -50 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 5, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-      >
+      <div className="absolute top-0 right-[20%] opacity-60">
         <svg width="40" height="300" viewBox="0 0 40 300" fill="none">
           <path d="M0 0 L40 0 L35 20 L5 20 Z" fill="#d4a853" />
           <rect x="10" y="20" width="20" height="260" stroke="#d4a853" strokeWidth="1" strokeDasharray="10 5" />
@@ -369,7 +300,7 @@ function AncientAnimations() {
           <circle cx="20" cy="150" r="5" stroke="#d4a853" strokeWidth="1" />
           <path d="M15 140 L25 160 M15 160 L25 140" stroke="#d4a853" strokeWidth="1" />
         </svg>
-      </motion.div>
+      </div>
     </div>
   )
 }
