@@ -3,23 +3,23 @@ import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { Loader2, Clock, Hourglass } from 'lucide-react'
 import { generateCityTimeline } from '../services/GroqService'
 
-export default function Timeline({ city }) {
+export default function Timeline({ location }) {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
   
   // Cache to avoid refetching during the same session
-  const [cachedCity, setCachedCity] = useState('')
+  const [cachedLocation, setCachedLocation] = useState('')
 
   useEffect(() => {
-    if (!city || city === cachedCity) return
+    if (!location || location === cachedLocation) return
     
     const fetchTimeline = async () => {
       setLoading(true)
       try {
-        const data = await generateCityTimeline(city)
+        const data = await generateCityTimeline(location)
         if (data && data.length > 0) {
           setEvents(data)
-          setCachedCity(city)
+          setCachedLocation(location)
         }
       } catch (err) {
         console.error('Timeline error:', err)
@@ -29,7 +29,7 @@ export default function Timeline({ city }) {
     }
     
     fetchTimeline()
-  }, [city, cachedCity])
+  }, [location, cachedLocation])
 
   const containerRef = useRef(null)
   
@@ -38,7 +38,7 @@ export default function Timeline({ city }) {
   // A subtle parallax background element
   const bgX = useTransform(scrollXProgress, [0, 1], ['0%', '-20%'])
 
-  if (!city) return null
+  if (!location) return null
 
   return (
     <div className="relative w-full overflow-hidden py-10 bg-gradient-to-b from-heritage-900/40 to-transparent rounded-sm border border-regal-gold/10">
@@ -52,7 +52,7 @@ export default function Timeline({ city }) {
       <div className="px-6 mb-6 flex items-center gap-3 relative z-10">
         <Hourglass className="text-regal-gold" size={24} />
         <div>
-          <h2 className="font-cinzel text-xl text-parchment uppercase tracking-widest">Evolution of {city}</h2>
+          <h2 className="font-cinzel text-xl text-parchment uppercase tracking-widest">Evolution of {location}</h2>
           <p className="text-heritage-400 text-xs font-body italic mt-1">Journey through time, from origins to modern era</p>
         </div>
       </div>

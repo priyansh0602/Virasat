@@ -6,10 +6,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useInView } from 'framer-motion'
 import { supabase } from '../lib/SupabaseClient'
-import {
-  searchWikipedia, geoSearchHeritage, getArticleSummary, geocodeCityIndia, fetchHeritageIcons
-} from '../services/WikipediaService'
+import { searchWikipedia, geoSearchHeritage, getArticleSummary, geocodeCityIndia, fetchHeritageIcons } from '../services/WikipediaService'
 import { discoverHeritageSites, generateHeritageStory, chatWithHeritage, generateHeritageQuiz, generateCityTimeline, chatWithGlobalHeritage } from '../services/GroqService'
+import { STATE_HERITAGE } from '../data/StateData'
 
 import HeritageMap from './HeritageMap'
 import Timeline from './Timeline'
@@ -335,12 +334,24 @@ function HeritageCard({ item, t, lang, user, onBadgeEarned, index, persona = 'ba
 
   const loadDetail = useCallback(async () => {
     if (detail || loading) return
+    
+    // Short-circuit API if we already have hardcoded description and image
+    if (item.snippet && item.thumbnail) {
+      setDetail({
+        extract: item.snippet,
+        thumbnail: item.thumbnail,
+        title: item.title,
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`
+      })
+      return
+    }
+
     setLoad(true)
     // Pass title or query hint for smarter image matching, especially for AI-discovered items
     const d = await getArticleSummary(item.pageid, item.thumbnail_query || item.title)
     setDetail(d)
     setLoad(false)
-  }, [item.pageid, item.title, item.thumbnail_query, detail, loading])
+  }, [item.pageid, item.title, item.thumbnail_query, item.snippet, item.thumbnail, detail, loading])
 
   // Only fetch details when the card scrolls into view — saves dozens of API calls
   useEffect(() => { if (isInView) loadDetail() }, [isInView, loadDetail])
@@ -472,7 +483,14 @@ function HeritageCard({ item, t, lang, user, onBadgeEarned, index, persona = 'ba
             <Loader2 size={14} className="animate-spin" /> Loading…
           </div>
         ) : (
-          <p className="text-heritage-400 text-sm font-body leading-relaxed line-clamp-3 mb-4">{snippet || 'No description available.'}</p>
+          <div className="mb-4">
+            <p className="text-heritage-400 text-sm font-body leading-relaxed line-clamp-3 mb-2">{snippet || 'No description available.'}</p>
+            {detail?.url && detail.url !== '#' && (
+              <a href={detail.url} target="_blank" rel="noreferrer" className="text-xs text-regal-gold hover:text-white flex items-center gap-1 w-max transition-colors">
+                Read more on Wikipedia <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
         )}
 
         {/* Story Panel */}
@@ -742,30 +760,43 @@ export default function Dashboard({ user, profile, onPlayGame }) {
     }
   }, [user?.id])
 
-  // ✅ FIX: useCallback definitions BEFORE the useEffect that depends on them
-  const fetchNearby = useCallback(async (city) => {
-    if (!city) return
+  const fetchNearby = useCallback(async (location) => {
+    if (!location) return
     setGeoLoad(true)
     try {
-      const coords = await geocodeCityIndia(city)
+      const coords = await geocodeCityIndia(location)
       if (coords) setMapCenter(coords)
 
-      // Use AI Discovery first — it returns full descriptions + images
-      let sites = await searchWikipedia(`${city} heritage monuments temple fort`, 4)
+      const stateKey = location.trim().toLowerCase()
+      let sites = []
 
-      // Add geo coords for map if available
-      if (coords && sites.length > 0) {
-        sites = sites.map((s, i) => ({
+      // If it's a known state, strictly use its hardcoded heritage places
+      if (STATE_HERITAGE[stateKey]) {
+        sites = STATE_HERITAGE[stateKey].map(s => ({
           ...s,
-          lat: coords.lat + (Math.random() - 0.5) * 0.05,
-          lon: coords.lon + (Math.random() - 0.5) * 0.05,
+          lat: coords ? coords.lat + (Math.random() - 0.5) * 0.05 : 0,
+          lon: coords ? coords.lon + (Math.random() - 0.5) * 0.05 : 0,
           dist: Math.floor(Math.random() * 3000),
+          source: 'Local-Verified'
         }))
-      }
+      } else {
+        // Fallback for cities: Use AI Discovery first — it returns full descriptions + images
+        sites = await searchWikipedia(`${location} heritage monuments temple fort`, 4)
+        
+        // Add geo coords for map if available
+        if (coords && sites.length > 0) {
+          sites = sites.map((s, i) => ({
+            ...s,
+            lat: coords.lat + (Math.random() - 0.5) * 0.05,
+            lon: coords.lon + (Math.random() - 0.5) * 0.05,
+            dist: Math.floor(Math.random() * 3000),
+          }))
+        }
 
-      // Fallback to geo search if nothing came back
-      if (sites.length === 0 && coords) {
-        sites = await geoSearchHeritage(coords.lat, coords.lon, 10000, 4, city)
+        // Fallback to geo search if nothing came back
+        if (sites.length === 0 && coords) {
+          sites = await geoSearchHeritage(coords.lat, coords.lon, 10000, 4, location)
+        }
       }
 
       setNearby(sites.slice(0, 4))
@@ -773,11 +804,11 @@ export default function Dashboard({ user, profile, onPlayGame }) {
     finally { setGeoLoad(false) }
   }, [])
 
-  const fetchIcons = useCallback(async (city) => {
-    if (!city) return
+  const fetchIcons = useCallback(async (location) => {
+    if (!location) return
     setIconsLoad(true)
     try {
-      const result = await fetchHeritageIcons(city)
+      const result = await fetchHeritageIcons(location)
       setIcons(result.slice(0, 4))
     }
     catch (err) { console.error('Icons error:', err) }
@@ -785,9 +816,9 @@ export default function Dashboard({ user, profile, onPlayGame }) {
   }, [])
 
   useEffect(() => {
-    fetchNearby(profile?.city || 'India')
-    fetchIcons(profile?.city || 'India')
-  }, [profile?.city, fetchNearby, fetchIcons])
+    fetchNearby(profile?.state || 'India')
+    fetchIcons(profile?.state || 'India')
+  }, [profile?.state, fetchNearby, fetchIcons])
 
   const handleGlobalChatSubmit = async (e) => {
     e.preventDefault()
@@ -958,13 +989,13 @@ export default function Dashboard({ user, profile, onPlayGame }) {
             <TextReveal text={t.tagline} className="text-gold-gradient" delay={0.5} />
           </h1>
 
-          {profile?.city && (
+          {profile?.state && (
             <motion.div
               className="inline-flex items-center gap-2 bg-heritage-950/40 backdrop-blur-md border border-regal-gold/20 rounded-sm px-5 py-2.5 text-sm font-body"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1.5 }}
             >
               <MapPin size={14} className="text-regal-gold" />
-              <span className="text-heritage-300">Exploring heritage around <strong className="text-regal-gold">{profile.city}</strong></span>
+              <span className="text-heritage-300">Exploring heritage in <strong className="text-regal-gold">{profile.state}</strong></span>
             </motion.div>
           )}
 
@@ -1006,7 +1037,7 @@ export default function Dashboard({ user, profile, onPlayGame }) {
         </AnimatePresence>
 
         {/* ── Chapter 1: Time-Travel Timeline ── */}
-        {(lastSearched || profile?.city) && <Timeline city={lastSearched || profile?.city} />}
+        {(lastSearched || profile?.state) && <Timeline location={lastSearched || profile?.state} />}
 
         {/* ── Chapter 2: Historical Figures ── */}
         <ChapterDivider title="Historical Icons" number={2} />
@@ -1014,8 +1045,8 @@ export default function Dashboard({ user, profile, onPlayGame }) {
         <ParallaxSection className="mb-14" speed={0.15}>
           <SectionHeader
             icon={<User size={22} className="text-regal-gold" />}
-            title={t.iconsTitle + (profile?.city ? ` — ${profile.city}` : '')}
-            count={icons.length} onRefresh={() => fetchIcons(profile?.city || 'India')} refreshing={iconsLoad}
+            title={t.iconsTitle + (profile?.state ? ` — ${profile.state}` : '')}
+            count={icons.length} onRefresh={() => fetchIcons(profile?.state || 'India')} refreshing={iconsLoad}
           />
           {iconsLoad ? (
             <div className="flex items-center gap-3 text-heritage-400 font-body py-8">
@@ -1023,7 +1054,7 @@ export default function Dashboard({ user, profile, onPlayGame }) {
             </div>
           ) : icons.length === 0 ? (
             <div className="text-center py-10 text-heritage-600 font-body border border-dashed border-heritage-800 rounded-sm">
-              <p className="italic">No specific historical icons found for this city yet.</p>
+              <p className="italic">No specific historical icons found for this state yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -1037,7 +1068,7 @@ export default function Dashboard({ user, profile, onPlayGame }) {
           <>
             <ChapterDivider title="Heritage Pulse" number={3} />
             <ParallaxSection className="mb-14" speed={0.1}>
-              <SectionHeader icon={<Globe size={22} className="text-regal-gold" />} title={`Heritage Pulse — ${profile?.city || 'Map'}`} />
+              <SectionHeader icon={<Globe size={22} className="text-regal-gold" />} title={`Heritage Pulse — ${profile?.state || 'Map'}`} />
               <motion.div
                 className="border border-regal-gold/20 rounded-sm overflow-hidden shadow-cinematic"
                 initial={{ opacity: 0, scale: 0.98 }}
@@ -1057,8 +1088,8 @@ export default function Dashboard({ user, profile, onPlayGame }) {
         <ParallaxSection className="mb-4" speed={0.15}>
           <SectionHeader
             icon={<MapPin size={22} className="text-regal-gold" />}
-            title={t.nearbyTitle + (profile?.city ? ` — ${profile.city}` : '')}
-            count={nearby.length} onRefresh={() => fetchNearby(profile?.city || 'India')} refreshing={geoLoad}
+            title={t.nearbyTitle + (profile?.state ? ` — ${profile.state}` : '')}
+            count={nearby.length} onRefresh={() => fetchNearby(profile?.state || 'India')} refreshing={geoLoad}
           />
           {geoLoad ? (
             <div className="flex items-center gap-3 text-heritage-400 font-body py-8">
@@ -1067,7 +1098,7 @@ export default function Dashboard({ user, profile, onPlayGame }) {
           ) : nearby.length === 0 ? (
             <div className="text-center py-16 text-heritage-600 font-body">
               <Landmark size={48} className="mx-auto mb-4 opacity-20 text-regal-gold" />
-              <p className="italic">No nearby sites found. Update your city in profile.</p>
+              <p className="italic">No nearby sites found. Update your state in profile.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

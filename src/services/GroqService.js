@@ -470,98 +470,20 @@ Rules:
   }
 }
 
-/* ═══════════════════════════════════════════
-   HARDCODED CITY TIMELINES
-   Instant fallback so the timeline never shows empty
-   for the most common heritage cities.
-   ═══════════════════════════════════════════ */
-const CITY_TIMELINES = {
-  jaipur: [
-    { era: 'Ancient', year: '~1000 BCE', title: 'Meena & Gurjar Settlements', description: 'The region around modern Jaipur was home to Meena and Gurjar tribes long before recorded history, with evidence of habitation dating to the pre-historic era.' },
-    { era: 'Medieval', year: '1150 CE', title: 'Amber Kingdom Founded', description: 'The Rajput Kachhwaha clan established the Amber Kingdom, which would become the predecessor state to Jaipur, building the iconic hilltop Amber Fort.' },
-    { era: 'Medieval', year: '1627', title: 'Jai Singh II Born', description: 'Sawai Jai Singh II, the visionary astronomer-king, is born. He would go on to found Jaipur and build the Jantar Mantar observatories across India.' },
-    { era: 'Early Modern', year: '1727', title: 'Jaipur Founded', description: 'Sawai Jai Singh II founded Jaipur — the first planned city in India — designed by architect Vidyadhar Bhattacharya on a precise grid following ancient Vastu Shastra.' },
-    { era: 'Colonial', year: '1876', title: 'City Painted Pink', description: 'Maharaja Ram Singh II had the entire city painted terracotta pink to welcome the Prince of Wales (Edward VII), earning Jaipur the nickname "Pink City."' },
-    { era: 'Modern', year: '1949', title: 'Merger with India', description: 'After Indian independence, the Jaipur State merged with the Indian Union in 1949. Jaipur became the capital of the newly formed state of Rajasthan.' },
-  ],
-  udaipur: [
-    { era: 'Ancient', year: '734 CE', title: 'Mewar Dynasty Rises', description: 'Bappa Rawal founded the Mewar kingdom, one of the oldest and most storied Hindu royal dynasties in the world, who would rule for over 1400 years.' },
-    { era: 'Medieval', year: '1303', title: 'Fall of Chittorgarh', description: 'Alauddin Khilji besieged Chittorgarh. Queen Padmini led the legendary act of Jauhar — mass self-immolation — to preserve honour, a defining moment in Rajput history.' },
-    { era: 'Medieval', year: '1559', title: 'Udaipur Founded', description: 'Maharana Udai Singh II founded Udaipur on the banks of Lake Pichola after the fall of Chittorgarh, establishing it as the new capital of Mewar.' },
-    { era: 'Medieval', year: '1576', title: 'Battle of Haldighati', description: 'Maharana Pratap faced the Mughal emperor Akbar\'s forces under Man Singh I. Though tactically inconclusive, Pratap\'s resistance became a symbol of Rajput valor.' },
-    { era: 'Colonial', year: '1818', title: 'British Treaty', description: 'The Mewar kingdom signed a treaty with the British East India Company, becoming a princely state under British suzerainty while retaining nominal autonomy.' },
-    { era: 'Modern', year: '1971', title: 'City of Lakes Fame', description: 'Udaipur was recognised globally as the "Venice of the East," with its palaces, lakes, and heritage drawing international tourists and filmmakers alike.' },
-  ],
-  varanasi: [
-    { era: 'Ancient', year: '~1200 BCE', title: 'City of Shiva Founded', description: 'Varanasi is one of the world\'s oldest continuously inhabited cities, sacred to Hindus as the abode of Lord Shiva, with Vedic rituals performed since at least 1200 BCE.' },
-    { era: 'Ancient', year: '528 BCE', title: 'Buddha\'s First Sermon', description: 'Near Varanasi at Sarnath, Siddhartha Gautama delivered his first sermon after attaining enlightenment, setting in motion the Wheel of Dharma.' },
-    { era: 'Medieval', year: '1194', title: 'Ghurids Sack Varanasi', description: 'Muhammad of Ghor\'s forces destroyed thousands of temples in Varanasi, erasing much of its ancient architectural heritage. The city rebuilt itself over centuries.' },
-    { era: 'Mughal', year: '1585', title: 'Akbar\'s Temple Grants', description: 'Emperor Akbar, known for his religious tolerance, granted land for the construction of the Vishwanath Temple, marking a rare period of harmony between the Mughals and Varanasi\'s Hindus.' },
-    { era: 'Colonial', year: '1780s', title: 'Benares Kingdom', description: 'The Benares Kingdom rose under Chet Singh, who famously resisted Warren Hastings\' excessive tax demands, triggering a major revolt against British authority.' },
-    { era: 'Modern', year: '2014', title: 'Narendra Modi Elected', description: 'Varanasi became the parliamentary constituency of Narendra Modi, who won the 2014 Lok Sabha election from here, marking a new political chapter for the ancient city.' },
-  ],
-  agra: [
-    { era: 'Ancient', year: '~1000 CE', title: 'Early Settlements', description: 'The Agra region, mentioned in the Sanskrit epic Mahabharata as Agrabana (forest of Agra), was an important hub on the Yamuna river long before Mughal rule.' },
-    { era: 'Medieval', year: '1504', title: 'Sikandar Lodi Founds Agra', description: 'Sultan Sikandar Lodi moved his capital from Delhi to Agra in 1504, establishing it as a major city for the first time and initiating its era of imperial importance.' },
-    { era: 'Mughal', year: '1526', title: 'Babur Captures Agra', description: 'After defeating Ibrahim Lodi at the First Battle of Panipat, Babur captured Agra and its legendary Koh-i-Noor diamond, establishing the Mughal Empire\'s first capital here.' },
-    { era: 'Mughal', year: '1632', title: 'Taj Mahal Construction Begins', description: 'Emperor Shah Jahan commissioned the Taj Mahal in memory of his wife Mumtaz Mahal, who died during childbirth. Over 20,000 artisans worked for 22 years to complete it.' },
-    { era: 'Colonial', year: '1803', title: 'British Capture Agra', description: 'The British East India Company defeated the Marathas and captured Agra, making it the capital of the North-Western Provinces and a key administrative centre.' },
-    { era: 'Modern', year: '1983', title: 'UNESCO World Heritage', description: 'The Taj Mahal, Agra Fort, and Fatehpur Sikri were designated UNESCO World Heritage Sites, cementing Agra\'s status as the crown jewel of Indian heritage tourism.' },
-  ],
-  delhi: [
-    { era: 'Ancient', year: '~900 BCE', title: 'Indraprastha Founded', description: 'The Mahabharata describes Indraprastha as the capital of the Pandavas, believed to be located near modern Delhi — one of the earliest references to human settlement in the region.' },
-    { era: 'Medieval', year: '1193', title: 'Delhi Sultanate Begins', description: 'Qutb-ud-din Aibak captured Delhi from the last Hindu ruler, establishing the Delhi Sultanate and beginning 320 years of Sultanate rule that shaped India\'s medieval identity.' },
-    { era: 'Medieval', year: '1526', title: 'Mughal Empire Established', description: 'Babur defeated Ibrahim Lodi at Panipat and established the Mughal Empire, which would rule from Delhi for three centuries and leave monuments that define the city today.' },
-    { era: 'Mughal', year: '1648', title: 'Shahjahanabad Built', description: 'Shah Jahan built his new capital Shahjahanabad (Old Delhi), including the iconic Red Fort and Jama Masjid, making Delhi the grandest city in Asia at the time.' },
-    { era: 'Colonial', year: '1911', title: 'Capital Moved to Delhi', description: 'The British moved India\'s capital from Calcutta to Delhi, and began building New Delhi — designed by Edwin Lutyens — as a grand imperial capital.' },
-    { era: 'Modern', year: '1947', title: 'Independence & Partition', description: 'India gained independence on 15 August 1947. Delhi witnessed both the joy of freedom and the trauma of Partition, with millions of refugees arriving from the newly formed Pakistan.' },
-  ],
-  amritsar: [
-    { era: 'Medieval', year: '1577', title: 'City Founded', description: 'The fourth Sikh Guru, Guru Ram Das, founded Amritsar and excavated the sacred Amrit Sarovar (Pool of Nectar) around which the city would grow.' },
-    { era: 'Sikh', year: '1604', title: 'Golden Temple Completed', description: 'Guru Arjan Dev, the fifth Sikh Guru, completed the construction of Harmandir Sahib (the Golden Temple) and installed the Adi Granth (Sikh scripture) within it.' },
-    { era: 'Sikh', year: '1799', title: 'Ranjit Singh Captures Amritsar', description: 'Maharaja Ranjit Singh captured Amritsar and made it the cultural and spiritual heart of his mighty Sikh Empire, which stretched from the Khyber Pass to the Sutlej River.' },
-    { era: 'Colonial', year: '1849', title: 'British Annexation of Punjab', description: 'After the Anglo-Sikh Wars, the British East India Company annexed Punjab and took control of the Koh-i-Noor diamond from the Sikh Empire.' },
-    { era: 'Colonial', year: '1919', title: 'Jallianwala Bagh Massacre', description: 'British General Dyer ordered troops to fire on unarmed civilians in the enclosed Jallianwala Bagh garden, killing over 1,000 people — a pivotal moment in India\'s independence movement.' },
-    { era: 'Modern', year: '1947', title: 'Partition & Independence', description: 'Amritsar, located near the newly drawn Pakistan border, became a focal point of the violent Partition of India, with the city witnessing mass migration and communal violence.' },
-  ],
-  hampi: [
-    { era: 'Ancient', year: '~300 CE', title: 'Kishkindha — Land of Vanaras', description: 'Ancient Hindu texts describe the Hampi region as Kishkindha — the realm of the monkey god Sugriva from the Ramayana — marking it as a sacred site long before Vijayanagara.' },
-    { era: 'Medieval', year: '1336', title: 'Vijayanagara Empire Founded', description: 'Brothers Harihara and Bukka Raya founded the Vijayanagara Empire at Hampi, establishing what would become the last great Hindu empire of South India, a bulwark against Sultanate expansion.' },
-    { era: 'Medieval', year: '1510', title: 'Golden Age of Krishnadevaraya', description: 'Under Emperor Krishnadevaraya, Vijayanagara became one of the largest cities in the world with a population of 500,000, famous for its grand temples, bazaars, and learning.' },
-    { era: 'Medieval', year: '1565', title: 'Battle of Talikota', description: 'A coalition of five Deccan Sultanates defeated Vijayanagara at the Battle of Talikota. The magnificent capital was sacked and burned for months, leaving the ruins we see today.' },
-    { era: 'Colonial', year: '1800s', title: 'Rediscovery by British', description: 'British surveyors and archaeologists "rediscovered" Hampi\'s ruins in the 19th century, sparking scholarly interest in the lost grandeur of the Vijayanagara Empire.' },
-    { era: 'Modern', year: '1986', title: 'UNESCO World Heritage Site', description: 'Hampi was inscribed as a UNESCO World Heritage Site, recognising its extraordinary collection of over 1,600 surviving monuments spanning 25 sq km of rocky landscape.' },
-  ],
-  mumbai: [
-    { era: 'Ancient', year: '~250 BCE', title: 'Ashoka\'s Inscriptions Nearby', description: 'Rock edicts of Emperor Ashoka found near Mumbai indicate the region was part of the Mauryan Empire. The seven islands that would become Mumbai were home to Koli fishing communities.' },
-    { era: 'Medieval', year: '1343', title: 'Muslim Sultanate Rule', description: 'The islands of Mumbai came under the Gujarat Sultanate, which built several mosques and established trade routes. The Koli and Agri communities continued to inhabit the islands.' },
-    { era: 'Colonial', year: '1661', title: 'Gifted to Britain', description: 'The islands of Bombay were gifted to King Charles II of England as part of the dowry of Catherine of Braganza of Portugal, and then leased to the East India Company for £10 per year.' },
-    { era: 'Colonial', year: '1853', title: 'First Railway in Asia', description: 'India\'s first passenger railway line opened between Bombay and Thane on 16 April 1853 — the first railway in all of Asia — transforming Bombay into a modern industrial city.' },
-    { era: 'Nationalist', year: '1942', title: 'Quit India Movement', description: 'Gandhi launched the Quit India Movement from Bombay\'s Gowalia Tank Maidan on 8 August 1942, demanding an end to British rule in the most decisive call of the independence struggle.' },
-    { era: 'Modern', year: '1995', title: 'Renamed Mumbai', description: 'Bombay was officially renamed Mumbai by the Shiv Sena-led state government, reclaiming the city\'s original Marathi name derived from the goddess Mumbadevi.' },
-  ],
-  kota: [
-    { era: 'Ancient', year: '12th Century', title: 'Kota Region Origins', description: 'The region, once part of the kingdom of Bundi, was given as a jagir (fiefdom) to princes of the Chauhan clan. It was originally inhabited by the Bhil tribes.' },
-    { era: 'Medieval', year: '1241', title: 'Prince Jait Singh Captures Kota', description: 'Prince Jait Singh of Bundi defeated the Bhil chieftain Kotiya and captured the region, naming it Kota in his honour and establishing it as a separate principality.' },
-    { era: 'Mughal', year: '1631', title: 'Independent Statehood', description: 'Emperor Shah Jahan granted Kota the status of an independent state under Madho Singh, separating it from Bundi as a reward for his military service to the Mughals.' },
-    { era: 'Late Modern', year: '18th Century', title: 'The Rise of Zalim Singh', description: 'The brilliant administrator and diplomat Zalim Singh became the de facto ruler, building several fortifications and making Kota an oasis of stability during the Maratha wars.' },
-    { era: 'Colonial', year: '1818', title: 'British Alliance', description: 'Kota was one of the first Rajput states to sign a treaty of subsidiary alliance with the British East India Company, ensuring its protection and administrative continuity.' },
-    { era: 'Modern', year: '1948', title: 'Integration with Rajasthan', description: 'After Indian independence, the princely state of Kota merged into the United State of Rajasthan, eventually becoming part of the current state of Rajasthan.' },
-  ],
-}
+import { getFallbackTimeline } from '../data/StateData'
 
 /**
- * generateCityTimeline
- * Generates a chronological list of 5-7 key historical moments for a given city.
- * @param {string} city - Name of the city
+ * generateTimeline
+ * Generates a chronological list of 5-7 key historical moments for a given region/state.
+ * @param {string} location - Name of the location
  * @returns {Promise<Array<{era: string, year: string, title: string, description: string}>>}
  */
-export async function generateCityTimeline(city) {
+export async function generateCityTimeline(location) {
   if (!GROQ_API_KEY) return [];
 
-  // 0. Instant hardcoded data — zero API calls for known cities
-  const hardcoded = CITY_TIMELINES[city.trim().toLowerCase()]
-  if (hardcoded) return hardcoded
+  // 0. Instant hardcoded data — zero API calls for known states
+  const hardcoded = getFallbackTimeline(location)
+  if (hardcoded && hardcoded.length > 0 && hardcoded[0].title !== 'Early Settlements') return hardcoded
 
 
   // Check Supabase cache first
@@ -569,12 +491,12 @@ export async function generateCityTimeline(city) {
     const { data: cached, error } = await supabase
       .from('timeline_cache')
       .select('events, expires_at')
-      .eq('city', city)
+      .eq('city', location)
       .gt('expires_at', new Date().toISOString())
       .maybeSingle();
 
     if (cached && cached.events && !error) {
-      console.log('Returning timeline from Supabase cache for:', city);
+      console.log('Returning timeline from Supabase cache for:', location);
       return cached.events;
     }
   } catch (err) {
@@ -582,7 +504,7 @@ export async function generateCityTimeline(city) {
   }
 
   const systemPrompt = `You are a master historian for the Virasat app. 
-Return ONLY a valid JSON array of exactly 6 historical events for the chosen city, in chronological order (from ancient to modern).
+Return ONLY a valid JSON array of exactly 6 historical events for the chosen region/state, in chronological order (from ancient to modern).
 No markdown formatting, no explanations. 
 Format for each object:
 {
@@ -592,7 +514,7 @@ Format for each object:
   "description": "3 to 5 lines of vivid, engaging historical facts."
 }`;
 
-  const userPrompt = `Generate the historical timeline for ${city}, India.`;
+  const userPrompt = `Generate the historical timeline for ${location}, India.`;
 
   try {
     const response = await queuedGroqFetch({
@@ -614,7 +536,7 @@ Format for each object:
     const data = await response.json();
     if (data.error) {
       console.warn('Groq 429 (timeline):', data.error)
-      return [];
+      return hardcoded || [];
     }
     const text = data.choices?.[0]?.message?.content || '';
     const jsonMatch = text.match(/\[[\s\S]*\]/);
@@ -625,7 +547,7 @@ Format for each object:
       try {
         const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         await supabase.from('timeline_cache').upsert({
-          city: city,
+          city: location,
           events: events,
           created_at: new Date().toISOString(),
           expires_at: expiresAt
@@ -636,10 +558,10 @@ Format for each object:
 
       return events;
     }
-    return [];
+    return hardcoded || [];
   } catch (err) {
     console.error('Timeline Error:', err);
-    return [];
+    return hardcoded || [];
   }
 }
 
