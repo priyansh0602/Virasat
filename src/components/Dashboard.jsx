@@ -816,9 +816,11 @@ export default function Dashboard({ user, profile, onPlayGame }) {
   }, [])
 
   useEffect(() => {
-    fetchNearby(profile?.state || 'India')
-    fetchIcons(profile?.state || 'India')
-  }, [profile?.state, fetchNearby, fetchIcons])
+    console.log("Virasat Profile Debug:", profile);
+    const targetState = profile?.state || 'India';
+    fetchNearby(targetState);
+    fetchIcons(targetState);
+  }, [profile, fetchNearby, fetchIcons])
 
   const handleGlobalChatSubmit = async (e) => {
     e.preventDefault()
