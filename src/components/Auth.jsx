@@ -386,6 +386,7 @@ export default function Auth({ onAuthSuccess }) {
                       onChange={e => setEmail(e.target.value)}
                       className="input-field pl-10"
                       required
+                      autoComplete="email"
                     />
                   </div>
                   <div className="relative">
@@ -398,6 +399,7 @@ export default function Auth({ onAuthSuccess }) {
                       className="input-field pl-10 pr-10"
                       required
                       minLength={6}
+                      autoComplete={isLogin ? "current-password" : "new-password"}
                     />
                     <button type="button" onClick={() => setShowPw(!showPw)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-heritage-500 hover:text-regal-gold transition-colors">
