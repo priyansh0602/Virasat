@@ -85,6 +85,11 @@ export default function App() {
 
   const handleSession = (sess) => {
     setSession(sess)
+    console.log("Virasat Auth Debug: Session changed", { 
+      uid: sess?.user?.id, 
+      meta: sess?.user?.user_metadata 
+    });
+    
     if (!sess) {
       setScreen('auth')
       setProfile(null)

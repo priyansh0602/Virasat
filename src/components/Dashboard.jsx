@@ -845,7 +845,12 @@ export default function Dashboard({ user, profile, onPlayGame }) {
   }
 
   const clearSearch = () => { setQuery(''); setLastSearched(''); setResults([]); searchRef.current?.focus() }
-  const handleSignOut = async () => { await supabase.auth.signOut(); window.location.reload() }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    localStorage.clear()
+    sessionStorage.clear()
+    window.location.reload()
+  }
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Explorer'
   const avatar = user?.user_metadata?.avatar_url
