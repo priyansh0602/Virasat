@@ -258,7 +258,12 @@ export default function Auth({ onAuthSuccess }) {
     setLoad(true); clear()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: appRedirectUrl },
+      options: { 
+        redirectTo: appRedirectUrl,
+        queryParams: {
+          prompt: 'select_account',
+        },
+      },
     })
     if (err) { setError(err.message); setLoad(false) }
   }

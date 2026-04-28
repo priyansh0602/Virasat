@@ -87,6 +87,7 @@ export default function App() {
     setSession(sess)
     if (!sess) {
       setScreen('auth')
+      setProfile(null)
       return
     }
     const meta = sess.user?.user_metadata ?? {}
@@ -98,11 +99,15 @@ export default function App() {
     }
   }
 
-  const handleAuthSuccess = () => {
-    // onAuthStateChange will fire and handle navigation
+  const handleAuthSuccess = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    handleSession(session)
   }
 
-  const handleOnboardComplete = (profileData) => {
+  const handleOnboardComplete = async (profileData) => {
+    // Refresh session to get latest metadata (onboarded=true)
+    const { data: { session } } = await supabase.auth.getSession()
+    setSession(session)
     setProfile(profileData)
     setScreen('dashboard')
   }
