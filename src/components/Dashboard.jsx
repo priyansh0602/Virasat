@@ -954,6 +954,19 @@ export default function Dashboard({ user, profile, onPlayGame }) {
                   <button onClick={handleSignOut} className="flex items-center gap-2 w-full px-4 py-3 text-sm font-body text-red-400 hover:bg-red-900/20 transition-colors">
                     <LogOut size={14} /> Sign Out
                   </button>
+                  <button 
+                    onClick={() => {
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      document.cookie.split(";").forEach((c) => {
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                      });
+                      window.location.href = window.location.origin;
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-3 text-xs font-body text-heritage-600 hover:bg-heritage-800 transition-colors border-t border-heritage-800"
+                  >
+                    <RefreshCw size={12} /> Reset App & Clear Cache
+                  </button>
                 </div>
               )}
             </div>
