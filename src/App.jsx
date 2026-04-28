@@ -99,6 +99,7 @@ export default function App() {
     setSession(sess)
     console.log("Virasat Auth Debug: Session changed", { 
       uid: sess?.user?.id, 
+      email: sess?.user?.email,
       meta: sess?.user?.user_metadata 
     });
     
