@@ -131,6 +131,8 @@ export default function Onboarding({ user, onComplete }) {
               <div className="relative">
                 <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-500" />
                 <input
+                  id="onboarding-city"
+                  name="city"
                   type="text"
                   placeholder="e.g. Jaipur, Varanasi, Hampi…"
                   value={city}

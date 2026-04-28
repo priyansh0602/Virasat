@@ -385,6 +385,8 @@ export default function Auth({ onAuthSuccess }) {
                   <div className="relative">
                     <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-500" />
                     <input
+                      id="auth-email"
+                      name="email"
                       type="email"
                       placeholder="Email address"
                       value={email}
@@ -397,6 +399,8 @@ export default function Auth({ onAuthSuccess }) {
                   <div className="relative">
                     <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-500" />
                     <input
+                      id="auth-password"
+                      name="password"
                       type={showPw ? 'text' : 'password'}
                       placeholder="Password"
                       value={password}
