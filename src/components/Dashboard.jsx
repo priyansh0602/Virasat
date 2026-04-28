@@ -967,9 +967,6 @@ export default function Dashboard({ user, profile, onPlayGame }) {
                   >
                     <RefreshCw size={12} /> Reset App & Clear Cache
                   </button>
-                  <div className="px-4 py-2 border-t border-heritage-800 text-[10px] text-heritage-600 font-mono text-center">
-                    Build: 7e2e437
-                  </div>
                 </div>
               )}
             </div>

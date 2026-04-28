@@ -133,12 +133,6 @@ export default function App() {
   /* ── Render ── */
   return (
     <>
-      {/* Debug Banner */}
-      <div className="bg-red-600 text-white text-[10px] py-1 px-4 font-mono fixed top-0 left-0 right-0 z-[9999] flex justify-between">
-        <span>DEBUG: {session?.user?.email || 'GUEST'} | City: {profile?.city || 'NONE'} | State: {profile?.state || 'NONE'}</span>
-        <span>Build: 4b7e8d2</span>
-      </div>
-
       {screen === 'loading' && <Loader />}
       
       {screen === 'auth' && <Auth onAuthSuccess={handleAuthSuccess} />}
