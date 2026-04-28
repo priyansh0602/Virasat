@@ -131,16 +131,23 @@ export default function App() {
   }
 
   /* ── Render ── */
-  if (screen === 'loading') return <Loader />
+  return (
+    <>
+      {/* Debug Banner */}
+      <div className="bg-red-600 text-white text-[10px] py-1 px-4 font-mono fixed top-0 left-0 right-0 z-[9999] flex justify-between">
+        <span>DEBUG: {session?.user?.email || 'GUEST'} | City: {profile?.city || 'NONE'} | State: {profile?.state || 'NONE'}</span>
+        <span>Build: 4b7e8d2</span>
+      </div>
 
-  if (screen === 'auth')
-    return <Auth onAuthSuccess={handleAuthSuccess} />
-
-  if (screen === 'onboard')
-    return <Onboarding user={session?.user} onComplete={handleOnboardComplete} />
-
-  if (screen === 'game')
-    return <Game onBack={() => setScreen('dashboard')} user={session?.user} profile={profile} />
-
-  return <Dashboard user={session?.user} profile={profile} onPlayGame={() => setScreen('game')} />
+      {screen === 'loading' && <Loader />}
+      
+      {screen === 'auth' && <Auth onAuthSuccess={handleAuthSuccess} />}
+      
+      {screen === 'onboard' && <Onboarding user={session?.user} onComplete={handleOnboardComplete} />}
+      
+      {screen === 'game' && <Game onBack={() => setScreen('dashboard')} user={session?.user} profile={profile} />}
+      
+      {screen === 'dashboard' && <Dashboard user={session?.user} profile={profile} onPlayGame={() => setScreen('game')} />}
+    </>
+  )
 }
