@@ -72,12 +72,24 @@ export default function App() {
 
   /* ── Bootstrap auth state ── */
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session)
+    // Verify session on mount - getUser() is more secure as it hits the server
+    supabase.auth.getUser().then(({ data: { user }, error }) => {
+      if (error || !user) {
+        handleSession(null)
+      } else {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          handleSession(session)
+        })
+      }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleSession(session)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Virasat Auth Event:", event);
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        handleSession(null)
+      } else {
+        handleSession(session)
+      }
     })
 
     return () => subscription.unsubscribe()
