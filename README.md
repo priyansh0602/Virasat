@@ -1,6 +1,6 @@
 # 🏛️ Virasat — RAG-Driven Multilingual Heritage Knowledge Base
 
-A production-grade full-stack app built with **React + Vite**, **Tailwind CSS**, **Supabase**, and the **Wikipedia MediaWiki API**.
+A fullstack app that tells about Heritage(Virasat), tells a famous legend of the historic people and laces .
 
 ---
 
