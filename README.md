@@ -1,6 +1,6 @@
 # 🏛️ Virasat — RAG-Driven Multilingual Heritage Knowledge Base
 
-A fullstack app that tells about Heritage(Virasat), tells a famous legend of the historic people and laces .
+A fullstack app that tells about Heritage(Virasat), tells a famous legend of the historic people and places .
 
 ---
 
