@@ -52,7 +52,7 @@ function AnimatedLogo() {
   return (
     <motion.svg
       viewBox="0 0 60 60"
-      className="w-16 h-16"
+      className="w-12 h-12"
       fill="none"
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -111,20 +111,20 @@ function QuoteRotator() {
   }, [])
 
   return (
-    <div className="h-16 flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={idx}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.8 }}
           className="text-center"
         >
-          <p className="text-heritage-300/80 text-sm font-sans italic leading-relaxed">
+          <p className="text-heritage-300/80 text-xs font-sans italic leading-relaxed">
             "{QUOTES[idx].text}"
           </p>
-          <p className="text-regal-gold/50 text-xs font-body mt-1 tracking-wider uppercase">
+          <p className="text-regal-gold/50 text-xs font-body mt-0.5 tracking-wider uppercase">
             — {QUOTES[idx].author}
           </p>
         </motion.div>
@@ -294,7 +294,7 @@ export default function Auth({ onAuthSuccess }) {
   const isLogin = mode === 'login'
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+    <div className="h-screen overflow-hidden relative flex items-center justify-center">
       {/* Cinematic Background */}
       <div className="absolute inset-0">
         <div
@@ -315,20 +315,20 @@ export default function Auth({ onAuthSuccess }) {
       <FloatingParticles />
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-md px-4 py-12">
+      <div className="relative z-10 w-full max-w-md px-4 py-0">
 
         {/* Header — Animated Logo + Title */}
         <motion.div
-          className="text-center mb-10"
+          className="text-center mb-5"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
         >
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-2">
             <AnimatedLogo />
           </div>
           <motion.h1
-            className="font-decorative text-5xl md:text-6xl text-gold-gradient tracking-widest"
+            className="font-decorative text-4xl md:text-5xl text-gold-gradient tracking-widest"
             initial={{ opacity: 0, letterSpacing: '0.5em' }}
             animate={{ opacity: 1, letterSpacing: '0.15em' }}
             transition={{ duration: 1.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -336,7 +336,7 @@ export default function Auth({ onAuthSuccess }) {
             Virasat
           </motion.h1>
           <motion.p
-            className="font-cinzel text-heritage-400/80 text-xs mt-2 tracking-[0.35em] uppercase"
+            className="font-cinzel text-heritage-400/80 text-xs mt-1 tracking-[0.35em] uppercase"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1.5 }}
@@ -347,7 +347,7 @@ export default function Auth({ onAuthSuccess }) {
 
         {/* Card */}
         <motion.div
-          className="card-heritage px-8 py-10 glow-gold"
+          className="card-heritage px-7 py-6 glow-gold"
           initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.8, delay: 1, ease: [0.16, 1, 0.3, 1] }}
@@ -357,7 +357,7 @@ export default function Auth({ onAuthSuccess }) {
               <OtpVerify key="otp" email={email} onVerified={onAuthSuccess} onBack={() => setMode('login')} />
             ) : (
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <h2 className="font-cinzel text-2xl text-parchment mb-6 text-center tracking-wider">
+                <h2 className="font-cinzel text-xl text-parchment mb-4 text-center tracking-wider">
                   {isLogin ? 'Welcome Back' : 'Begin Your Journey'}
                 </h2>
 
@@ -366,8 +366,8 @@ export default function Auth({ onAuthSuccess }) {
                   onClick={handleGoogle}
                   disabled={loading}
                   className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10
-                             border border-heritage-600/30 hover:border-regal-gold/40 rounded-sm py-3 px-4 text-sm font-body font-medium
-                             text-parchment shadow-sm transition-all duration-300 mb-5 backdrop-blur-sm"
+                             border border-heritage-600/30 hover:border-regal-gold/40 rounded-sm py-2.5 px-4 text-sm font-body font-medium
+                             text-parchment shadow-sm transition-all duration-300 mb-4 backdrop-blur-sm"
                 >
                   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -381,7 +381,7 @@ export default function Auth({ onAuthSuccess }) {
                 <div className="ornament-divider"><span className="text-regal-gold/40">✦</span></div>
 
                 {/* Form */}
-                <form onSubmit={handleEmailAuth} className="space-y-4">
+                <form onSubmit={handleEmailAuth} className="space-y-3">
                   <div className="relative">
                     <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-500" />
                     <input
@@ -449,7 +449,7 @@ export default function Auth({ onAuthSuccess }) {
                 </div>
 
 
-                <p className="text-center text-sm text-heritage-500 mt-6 font-body">
+                <p className="text-center text-sm text-heritage-500 mt-4 font-body">
                   {isLogin ? "Don't have an account? " : 'Already have an account? '}
                   <button
                     onClick={() => { setMode(isLogin ? 'signup' : 'login'); clear() }}
@@ -465,7 +465,7 @@ export default function Auth({ onAuthSuccess }) {
 
         {/* Rotating Quote */}
         <motion.div
-          className="mt-8"
+          className="mt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 2 }}

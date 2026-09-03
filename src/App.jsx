@@ -3,13 +3,15 @@
  * Root component — manages auth state & screen routing:
  *   auth → onboarding → dashboard
  */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from './lib/SupabaseClient'
 import Auth        from './components/Auth'
-import Onboarding  from './components/Onboarding'
-import Dashboard   from './components/Dashboard'
-import Game        from './components/Game'
+
+// Lazy-load heavy components so they don't block initial paint
+const Onboarding  = lazy(() => import('./components/Onboarding'))
+const Dashboard   = lazy(() => import('./components/Dashboard'))
+const Game        = lazy(() => import('./components/Game'))
 
 /* ─── Cinematic full-screen loader ─── */
 function Loader() {
@@ -72,21 +74,17 @@ export default function App() {
 
   /* ── Bootstrap auth state ── */
   useEffect(() => {
-    // Verify session on mount - getUser() is more secure as it hits the server
-    supabase.auth.getUser().then(({ data: { user }, error }) => {
-      if (error || !user) {
-        handleSession(null)
-      } else {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          handleSession(session)
-        })
-      }
+    // getSession() reads from localStorage first — fast, no extra network round-trip
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session ?? null)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Virasat Auth Event:", event);
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
         handleSession(null)
+      } else if (event === 'INITIAL_SESSION') {
+        // already handled above, skip to avoid double render
+        return
       } else {
         handleSession(session)
       }
@@ -132,7 +130,7 @@ export default function App() {
 
   /* ── Render ── */
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       {screen === 'loading' && <Loader />}
       
       {screen === 'auth' && <Auth onAuthSuccess={handleAuthSuccess} />}
@@ -142,6 +140,6 @@ export default function App() {
       {screen === 'game' && <Game onBack={() => setScreen('dashboard')} user={session?.user} profile={profile} />}
       
       {screen === 'dashboard' && <Dashboard user={session?.user} profile={profile} onPlayGame={() => setScreen('game')} />}
-    </>
+    </Suspense>
   )
 }
